@@ -17,6 +17,7 @@ output:
 
 + R and Rstudio installed (available from Software Centre)
 + Install Git https://gitforwindows.org/ (does not require admin permissions)
+  +NOTE: When asked about “Adjusting your PATH environment”, make sure to select “Git from the command line and also from 3rd-party software”. Otherwise, accept the defaults.
 + Create a GitHub account https://github.com/
 
 ---
@@ -233,3 +234,13 @@ Not too hard to fix. Go through each file that has the orange U in the Git pane.
     + https://www.updatingdata.org/githubactions/ 
     + https://doi.org/10.1111/2041-210X.13982 
 
+---
+# Issues with installation
+
++ If RStudio is not finding a git installation 
++ Restart RStudio and try again
++ If still not working, run this in the windows command line: `git --exec-path`
++ Copy the path, then in RStudio click Tools > Global Options > Git/SVN and set the Git executable by clicking browse, pasting the path in the address bar and selecting the git.exe file.
++ Restart RStudio again
+See https://happygitwithr.com/rstudio-see-git.html for more instructions on troubleshooting
+  
