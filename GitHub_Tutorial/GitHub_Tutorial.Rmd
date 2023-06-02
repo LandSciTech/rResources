@@ -3,14 +3,7 @@ title: ' Using Git and GitHub Tutorial '
 subtitle: 'By Sarah Endicott  (but see Disclaimer)'
 author: Endicott,Sarah (elle, la | she, her) (ECCC)
 date: 2023-04-27
-output:
-  xaringan::moon_reader:
-    keep_md: true
-  lib_dir: libs
-  nature:
-    highlightStyle: github
-    highlightLines: true
-    countIncrementalSlides: false
+output: github_document
   
 ---
 #  Prerequisites:  
@@ -21,27 +14,27 @@ output:
   + NOTE: When asked about “Adjusting your PATH environment”, make sure to select “Git from the command line and also from 3rd-party software”. Otherwise, accept the defaults.
 + Create a GitHub account https://github.com/
 
----
+<!-- --- -->
 #  Start up 
 
 + Install R packages
 	+ `install.packages(" usethis ")`
 
----
+<!-- --- -->
 #  Set username and email for git 
 
 + `usethis::use_git_config(user.name = "Jane Doe", user.email = "jane@example.org")`
   + `user.name` is the name associated with your git commits so just make it informative for your collaborators (ie: actual name, github username)
   + `user.email` must match your GitHub account email
 
----
+<!-- --- -->
 #  Let git talk to GitHub  
 
 + `usethis::create_github_token()`
   + select “repo”, “user”, and “workflow” scopes
 + `gitcreds::gitcreds_set()`
 
----
+<!-- --- -->
 #  Start a new project with GitHub 
 
 **Step 1**: Make a new repo on GitHub
@@ -57,7 +50,7 @@ output:
 	+ Click the big green button that says “Create repository”.
 
 
----
+<!-- --- -->
 #  Start a new project with GitHub 
 
 **Step 2**: Copy repo URL
@@ -65,7 +58,7 @@ output:
 + Copy a clone URL to your clipboard. Use the HTTPS URL.
 ![](assets/img/clone_url.png)
 
----
+<!-- --- -->
 #  Start a new project with GitHub 
 
 + **Step 3**: Clone into a new project in RStudio
@@ -77,7 +70,7 @@ output:
 + Behind the scenes, RStudio has done this for you:
  `git clone https://github.com/see24/myrepo.git`
 
----
+<!-- --- -->
 #  Work on a project  
 
 .pull-left[
@@ -94,7 +87,7 @@ output:
 ![](assets/img/git_commit_modal.png)
 ]
 
----
+<!-- --- -->
 #  Sync changes to GitHub: Push 
 .pull-left[
 + Click “Push” in the Rstudio Git pane
@@ -102,7 +95,7 @@ output:
 ]
 .pull-right[![](assets/img/push.png)]
 
----
+<!-- --- -->
 #  Sync local copy from GitHub: Pull 
 
 .pull-left[
@@ -116,7 +109,7 @@ output:
 
 .pull-right[![](assets/img/pull.png)]
 
----
+<!-- --- -->
 #  Add an existing project to GitHub 
 
 + Create a new repo and Rstudio project in the same way as above
@@ -130,7 +123,7 @@ output:
 *This is the simplest way to do it but there is more advance, more traditional git way to do it: https://happygitwithr.com/existing-github-last.html*
 
 
----
+<!-- --- -->
 #  Git Terminology 1 
 
 + Repository (repo): Folder that contains a hidden .git file that tracks changes made to files in that folder. The folder can “live” on your local computer or a server like GitHub’s. On GitHub the repository is also the web page where all the files are stored among other things
@@ -139,7 +132,7 @@ output:
 + Clone: make a copy of a git repository.  By default in R studio this is connected to the GitHub version (called the remote or origin)
 + Commit: A marker that is kept in the git history and helps to incrementally track changes. Made useful by descriptive commit messages
 
----
+<!-- --- -->
 #  When to commit 
 
 + Often!
@@ -151,7 +144,7 @@ output:
 	+ `Fix bug in data cleaning handling of dates`
 	+ `Update exploratory plots with dates`
 
----
+<!-- --- -->
 # What to commit
 + Everything! 
   + Git can track any file but it does a better job with raw text files (eg: .R, .Rmd, .html, .md, .py, .sh, .txt)
@@ -162,27 +155,27 @@ output:
 + .gitignore: a file at the top level of git repo that tells git what not to track. 
   + Uses regular expressions to match file or folder names or types.
   + Example file: https://github.com/LandSciTech/caribouMetrics/blob/master/.gitignore
----
+<!-- --- -->
 #  When to push 
 
 + Fairly often. If you are working alone pushing is a way to back up your files. If you are collaborating it is away to make your work available to others. If you don’t push and then a collaborator makes changes to the same file it gets a bit tricky (but fixable).
 + Once you push you can’t use the “Amend previous commit” trick
 + If you find yourself reluctant to push because you aren’t ready for others to use your work consider making a branch (see below)
 
----
+<!-- --- -->
 #  When to pull 
 
 + Ideally every day, or when a collaborator lets you know they pushed
 + Pulling often prevents getting out of sync with collaborators
 + Before pulling be sure to commit all your local work
 
----
+<!-- --- -->
 #  Merge conflicts in Push/Pull 
 
 + If a collaborator pushed their changes after you last pulled you will need to pull before you can push. If your changes don’t conflict git will automatically merge their changes with yours.
 + Merge conflicts: when a collaborator made changes that overlap your changes. Git can’t automatically fit them together you have to review and pick the part to keep.
 
----
+<!-- --- -->
 #  Resolving merge conflicts 
 
 Ah! I pulled at the start of the day but then a collaborator pushed a change to the same line and now when I try to push it says I have to pull first and then when I pull I get merge conflicts!
@@ -190,14 +183,14 @@ Ah! I pulled at the start of the day but then a collaborator pushed a change to 
 Not too hard to fix. Go through each file that has the orange U in the Git pane. Find the location of the conflict. HEAD is your local version and the alphanumeric string is the commit id for the remote version that conflicts. Pick the one you want and delete all the marker lines (<<<, === and >>>). Then commit and continue on with your work
 ![](assets/img/merge_conflict.png)
 
----
+<!-- --- -->
 #  Avoiding merge conflicts 
 
 + Pull regularly
 + Keep in touch with collaborators so you are not working on the same lines at the same time.
 + Use a branch
 
----
+<!-- --- -->
 #  Branches 
 
 + A stream of commits that diverges from the main stream until it is ready to re-join.
@@ -206,7 +199,7 @@ Not too hard to fix. Go through each file that has the orange U in the Git pane.
 + See https://happygitwithr.com/git-branches.html#git-branches for how to manage branches with the command line but it can also be done through the Rstudio IDE and GitHub for the most part.
 
 
----
+<!-- --- -->
 #  Tour of GitHub repository page 
 
 + Code
@@ -214,19 +207,19 @@ Not too hard to fix. Go through each file that has the orange U in the Git pane.
 + Wiki
 + Settings
 
----
+<!-- --- -->
 #  Other stuff if time 
 
 + Making a repo work like a simple website https://happygitwithr.com/workflows-browsability.html#workflows-browsability
 + Installing a Git Client https://happygitwithr.com/git-client.html#git-client
 + Good default folder structure and setup for a typical analysis project: https://frbcesab.github.io/rcompendium/index.html 
 
----
+<!-- --- -->
 #  Disclaimer 
 
 + I copied almost everything from this Guide by Jenny Bryan: https://happygitwithr.com/index.html 
 
----
+<!-- --- -->
 # Advanced Uses
 + Host a website: https://www.emilyzabor.com/tutorials/rmarkdown_websites_tutorial.html
 + Use GitHub Actions for continuous integration: https://beamilz.com/posts/series-gha/2022-series-gha-1-what-is/en/
@@ -235,7 +228,7 @@ Not too hard to fix. Go through each file that has the orange U in the Git pane.
     + https://www.updatingdata.org/githubactions/ 
     + https://doi.org/10.1111/2041-210X.13982 
 
----
+<!-- --- -->
 # Issues with installation
 
 If RStudio is not finding a git installation:
