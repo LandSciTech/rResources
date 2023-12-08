@@ -1,0 +1,37 @@
+---
+title: "R package development"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{R package development}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The primary resource for package development is the book [R Packages](https://r-pkgs.org/index.html). It includes information on everything you need to know to build a package (with functions, tests and vignettes), connect it to GitHub and release it. The following are notes on implementing this process and some additional extensions (eg a pkgdown website and GitHub actions)
+
+### Change a package name 
+https://www.njtierney.com/post/2017/10/27/change-pkg-name/
+
+### Set up GitHub Actions
+
+Setup to run R CMD CHECK on GitHub on 3 OSes with `use_github_action_check_release()`
+More details available [here](https://orchid00.github.io/actions_sandbox/index.html).
+I had to make a new GitHub Personal Access Token because the one I had did not have the workflow scope. 
+
+I also changed the event that triggers the check to `on: workflow_dispatch` which means it is only run manually because if I was doing development on the master branch in a private repo and it uses up the resources quickly. The other option is to use branches for development and trigger the action on pull requests.
+
+### Setting up package website with pkgdown
+Use `usethis::use_pkgdown_github_pages()` to add a GitHub action to build the website based on documentation and vignettes whenever there is a push to the master branch which will keep it up to date. It uses a branch called gh-pages to do this so just don’t mess with that branch.
+
+### CRAN R CMD CHECK NOTES that have caused issues
+You will get a NOTE that says “no visible binding for global variable” if you use dplyr because column names are not really objects. Need to add .data$ before each, [see](https://dplyr.tidyverse.org/articles/programming.html#eliminating-r-cmd-check-notes-1)
+
+This also happened for me when I had data that I wanted to be available inside functions and also to the user. You can make it available to users with `use_data(dataset)` but you need to refer to it in the package with `package::dataset`. I have now had an issue with this where building the pkgdown website failed saying "dataset is not exported from namespace package" so not sure what the best answer is. At the moment I am including the data as both external and internal which seems to work. 
+

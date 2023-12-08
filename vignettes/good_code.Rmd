@@ -1,0 +1,84 @@
+---
+title: "Minimum requirements for good code"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Minimum requirements for good code}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Reproducibility
+**TLDR:** Use the [rcompendium](https://frbcesab.github.io/rcompendium/) and [renv](https://rstudio.github.io/renv/articles/renv.html) packages.
+
+All code should be reproducible on someone else's computer with minimal effort. There are typically two challenges for this: managing data and managing package versions. 
+
+### Project structure
+Use the package [`rcompendium`](https://frbcesab.github.io/rcompendium/) to create a new "compendium" for your R code, data and potentially paper. This will create a standard folder structure that makes it easy to remember paths across projects and set up useful strategies for ensuring reproducibility. The package automates all the boilerplate needed to follow good practices for reproducible research. Follow the Getting Started and Working with a Compendium articles on the package website to get set up. After initial set up it is easy to start a new project with `rcompendium::new_compendium`
+
+### Managing data
+Large data sets are typically not stored on GitHub so they need to be shared another way such as through Google drive or OSF or similar. Ideally they should be downloaded from here in the analysis code using eg [googledrive](https://googledrive.tidyverse.org/) or [osfr](https://docs.ropensci.org/osfr/). Either way the project should have a standard folder structure (eg the default in [rcompendium](https://frbcesab.github.io/rcompendium/articles/working_with_a_compendium.html)) so that relative paths in the code continue to work.  
+
+### Managing package versions
+For an analysis project that will eventually be shared in a static way use [renv](https://rstudio.github.io/renv/articles/renv.html) to track the packages used and their versions (also included in [rcompendium](https://frbcesab.github.io/rcompendium/articles/working_with_a_compendium.html#using-renv)). If you are creating a tool it should follow R package structure and have all packages recorded in DESCRIPTION (see [`usethis::use_package`](https://usethis.r-lib.org/reference/use_package.html))
+
+### Coding practices
+
+* [Never use setwd().](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/) Set up your project so that all the files you need are in a folder within the project. If you need to get data that is outside the project you could set the path at the top of the script or better yet put it online and download it programmatically. 
+
+* Put all sourced files, hardcoded variables and any paths that might need to be changed at the top of the script. 
+```
+# at the top of the script
+datPth <- “path/to/data/folder”
+#...
+#...
+# Wherever it is used
+myData <- read.csv(file.path(datPth, “myData.csv”))  
+```
+
+* Don't save your workspace. In Rstudio under Tools > Global Options > General uncheck restore workspace and set save workspace to never. Don’t use save() either. If there is an object that took awhile to create and you need it for another script use `saveRDS()` to save the individual objects. If it is a final result save it to a normal file (tif, csv, shp, …) since these will be easier to reuse. 
+
+* Re-run code from the top frequently. If some part of the code takes too long for this to be practical consider using [targets](https://books.ropensci.org/targets/) or [reproducible](https://reproducible.predictiveecology.org/), or if that is too complex save the results and at least re-run everything else.
+
+* Avoid repetition. Use [functions](https://r4ds.had.co.nz/functions.html) and [loops or iteration functions (eg `apply`, `purrr::map`)](https://r4ds.had.co.nz/iteration.html)
+* Comment your code. Try to focus on the why instead of what the code is doing. If you use clear names and functional programming the what should be apparent. You can make sections in a large document to structure it with:
+
+``` r
+# Load data #--------------------------
+
+# Prepare data #-----------------------
+
+# Run model #--------------------------
+```
+* Consider using [Quarto](https://quarto.org/docs/get-started/) or [Rmarkdown](https://rmarkdown.rstudio.com/lesson-1.html) so that you can write code, text, figures and tables together in one file that you can render to html, pdf or word doc. 
+
+
+## Style
+Aspirational standard: https://style.tidyverse.org/. It is not necessary to follow every detail exactly. 
+
+Key points:
+
+* Pick a naming convention and stick to it. tidyverse uses snake_case we sometimes uses camelCase pick one to stick to for each project.
+* Use meaningful names that are consistent. Eg. not `dat1`, `dat2` but `bee_obs_raw` and `bee_obs_use`.
+* Keep script to max 80 characters wide. 
+    * Under Tools>Global Options>Code>Display you can add a margin line at 80 char
+    * Use ctrl-shift-/ to reflow comments to max 80 char
+* Follow the spacing, indent, and assignment parts of the tidyverse guide
+    * Place spaces around all infix operators (=, +, -, <-, etc.). The same rule applies when using = in function calls. Always put a space after a comma, and never before (just like in regular English). 
+    * Rstudio will mostly indent for you. Use ctrl-i to fix indenting for a line or selection
+    * Use <- for assignment not =. Use the shortcut alt-- to insert <- with spaces.
+    * You can use ctrl-shift-A to style code but I don't like the way it breaks over lines so I use the [styler](https://styler.r-lib.org/) RStudio Addin to style a selection and then add line breaks manually.
+
+``` r
+# Good
+average <- mean(feet / 12 + inches, na.rm = TRUE)
+
+# Bad
+average=mean(feet/12+inches,na.rm=T)
+```
