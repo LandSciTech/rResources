@@ -6,7 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-Welcome to the R-Resources page! This is a place to share resources and
+Welcome to the rResources page! This is a place to share resources and
 best practices related to R and reproducible research. The following are
 pages that have been assembled by Sarah Endicott to record my best
 practices and recommendations for reproducible research in R. I welcome
@@ -15,12 +15,12 @@ you ideas and contributions!
 ### Resources
 
 [**Minimum requirements for “good”
-code**](https://landscitech.github.io/R-Resources/articles/good_code.html)  
+code**](https://landscitech.github.io/rResources/articles/good_code.html)  
 Recommendations for writing reproducible code with links to tools and
 more detailed resources
 
 [**R Package
-Development**](https://landscitech.github.io/R-Resources/articles/package_development.html)  
+Development**](https://landscitech.github.io/rResources/articles/package_development.html)  
 Links to R package development book and has my notes on additional steps
 for releasing a package on CRAN or GitHub
 

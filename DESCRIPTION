@@ -13,4 +13,4 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-URL: https://landscitech.github.io/R-Resources/
+URL: https://landscitech.github.io/rResources/
