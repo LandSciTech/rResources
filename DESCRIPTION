@@ -1,10 +1,10 @@
 Package: rResources
-Title: What the Package Does (One Line, Title Case)
+Title: Resources for Reproducible Research 
 Version: 0.0.0.9000
 Authors@R: 
     person("Sarah", "Endicott", , "sarah.endicott@canada.ca", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9644-5343"))
-Description: What the package does (one paragraph).
+Description: A shared location for sharing resources and best practices for reproducible research in science and ecology.
 License: TBD
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
