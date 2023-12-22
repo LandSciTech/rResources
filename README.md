@@ -35,7 +35,7 @@ that LERS has access to.
 
 ### Resources developed by others
 
-[**R for Data Science**](https://r4ds.had.co.nz/)  
+[**R for Data Science**](https://r4ds.hadley.nz/)  
 An intro to R that uses the tidyverse.
 
 [**Geocomputation with R**](https://geocompr.robinlovelace.net/)  
