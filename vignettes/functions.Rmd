@@ -1,0 +1,417 @@
+---
+title: "Why use functions"
+author: "Sarah Endicott and David Hope"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Why use functions}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+## Disclaimer 
+Much of the examples and code here comes from Hadley Wickham et al's books [R for data science](https://r4ds.hadley.nz/functions.html) and [R packages](https://r-pkgs.org/package-within.html).
+
+
+# Why use functions
+
+1.  You can give a function an evocative name that makes your code easier to understand.
+
+1.  Simplify code so repetition is hidden and differences are clear
+
+1.  Avoid copy paste errors
+
+1.  Only update code in one place
+
+1.  Reuse code across different projects
+
+
+# When to write a function
+
+Any time you copy paste a block of code more than twice! 
+This often means re-writing the first two spots where you used the code but it is worth it. 
+
+## Example 1
+
+Here is an example of repetition we can avoid by using a function. 
+
+```{r}
+library(tidyverse)
+
+df <- tibble(a = rnorm(5), b = rnorm(5), c = rnorm(5), d = rnorm(5))
+
+df |> mutate(  
+  a = (a - min(a, na.rm = TRUE)) / (max(a, na.rm = TRUE) - min(a, na.rm = TRUE)),
+  b = (b - min(a, na.rm = TRUE)) / (max(b, na.rm = TRUE) - min(b, na.rm = TRUE)),
+  c = (c - min(c, na.rm = TRUE)) / (max(c, na.rm = TRUE) - min(c, na.rm = TRUE)),
+  d = (d - min(d, na.rm = TRUE)) / (max(d, na.rm = TRUE) - min(d, na.rm = TRUE))
+)
+```
+Can you spot the copy-paste error above?
+
+Now that we fixed that, how can we turn this into a function?
+
+```{r}
+df |> mutate(  
+  a = (a - min(a, na.rm = TRUE)) / (max(a, na.rm = TRUE) - min(a, na.rm = TRUE)),
+  b = (b - min(b, na.rm = TRUE)) / (max(b, na.rm = TRUE) - min(b, na.rm = TRUE)),
+  c = (c - min(c, na.rm = TRUE)) / (max(c, na.rm = TRUE) - min(c, na.rm = TRUE)),
+  d = (d - min(d, na.rm = TRUE)) / (max(d, na.rm = TRUE) - min(d, na.rm = TRUE))
+)
+```
+
+
+1. Identify parts that are the same across repetitions and "factor out" the parts that are different. This is the function **body**
+
+For example, if we replace all the letters with `x` the rest is the same. 
+
+```{r eval=FALSE}
+(x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+```
+
+2. Choose a clear **name** that tells us what the function does. Ideally a verb. 
+3. Name the parts that will change between uses, these are the **arguments**. `x` is a conventional name for a numeric vector. 
+
+Function template:
+```{r eval=FALSE}
+name <- function(arguments) {
+  body
+}
+```
+
+Filling in the template we get:
+
+```{r}
+rescale01 <- function(x) {
+  (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+}
+```
+
+Then when we use the function in our code we can clearly see that we are applying the same rescaling across each column. 
+```{r}
+df |> mutate(  
+  a = rescale01(a),
+  b = rescale01(b),
+  c = rescale01(c),
+  d = rescale01(d)
+)
+```
+
+Then when your collaborator says they need the output in 0-100 instead of 0-1 we only need to change the code in one place and it will apply to all the columns.
+
+```{r}
+
+rescale01 <- function(x) {
+ x <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+ x*100
+}
+
+df |> mutate(  
+  a = rescale01(a),
+  b = rescale01(b),
+  c = rescale01(c),
+  d = rescale01(d)
+)
+```
+
+Note: you can decrease repetition even more using iteration eg `df |> mutate(across(a:d, rescale01))`. See [R for Data Science Chapter 26](https://r4ds.hadley.nz/iteration.html) for more on this.
+
+# What is a function?
+A function is an object in R just like a vector. A function can be defined in a package (eg: `dplyr::mutate`) or created in an R session. 
+As mentioned above a function has three parts that need to be defined, the name, arguments and body.
+
+```{r eval=FALSE}
+name <- function(arguments) {
+  body
+}
+```
+
+There is one additional part of a function that is implicitly created when the function is created which is an **environment**. An environment is the place where code looks for objects that are called. 
+
+For example, above we defined two objects `df` and `rescale01` which are both stored in the "Global environment" and are listed in the Environment pane in RStudio. The Global environment is the first place code run in the Console will look for an object. 
+
+But inside the body of our function `rescale01` we also defined an object `x`. 
+
+Does `x` exist?
+
+<br>
+<br>
+
+```{r error = TRUE}
+x
+```
+
+No! It doesn't exist in the Global environment, it only exists inside the function's environment. Objects created inside a function are not available in the Global environment. Only the result of the last expression evaluated in the function will be returned.
+
+For example: 
+```{r}
+rescale01 <- function(x) {
+ x <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+ x*100
+ message("data rescaled")
+}
+
+rescale01(df)
+```
+This returned NULL since that is the value returned by `message()`.
+
+To return the rescaled data we assign it to an object and then evaluate the object last.
+```{r}
+rescale01 <- function(x) {
+ x <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+ x <- x*100
+ message("data rescaled")
+ x
+}
+
+rescale01(df)
+```
+
+# Converting existing scripts to use functions
+
+## Example 2
+
+Imagine we have a script to process csv files containing observations of temperature and location from swimmers. 
+
+This is the R script:
+```{r}
+infile <- "swim.csv"
+swims_in <- read.csv(infile)
+swims <- swims_in
+swims
+
+# Assume country based on name for beach
+swims$english[swims$where == "beach"] <- "US"
+swims$english[swims$where == "coast"] <- "US"
+swims$english[swims$where == "seashore"] <- "UK"
+swims$english[swims$where == "seaside"] <- "UK"
+
+# Assume Farenheit for US
+swims$temp[swims$english == "US"] <- (swims$temp[swims$english == "US"] - 32) * 5/9
+swims
+
+# save result with a timestamp
+now <- Sys.time()
+timestamp <- format(now, "%Y-%B-%d_%H-%M-%S")
+(outfile <- paste0(timestamp, "_", sub("(.*)([.]csv$)", "\\1_clean\\2", infile)))
+write.csv(swims, file = outfile, quote = FALSE, row.names = FALSE)
+```
+
+This is an example of how functions can help to simplify code even when there isn't a lot of repetition. 
+
+First we make a function to assign a country based on the name used for the swimming location. This uses a look up table rather than assigning each directly to reduce the repeated `swims$english[swims$where ==` calls. 
+
+```{r}
+library(tidyverse)
+
+localize_beach <- function(dat) {
+  lookup_table <- tribble(
+    ~where, ~english,
+    "beach",     "US",
+    "coast",     "US",
+    "seashore",     "UK",
+    "seaside",     "UK"
+  )
+  left_join(dat, lookup_table, by = "where")
+}
+
+swims_in %>% localize_beach()
+```
+
+Then we write two functions, one to convert F to C and another that applies `f_to_c()` to US temperatures in a data frame.
+
+```{r}
+f_to_c <- function(x) (x - 32) * 5/9
+
+celsify_temp <- function(dat) {
+  mutate(dat, temp = if_else(english == "US", f_to_c(temp), temp))
+}
+
+swims_in %>% localize_beach() %>% celsify_temp()
+```
+
+Finally, one more function to create the output file name
+```{r}
+outfile_path <- function(infile) {
+  now <- Sys.time()
+  timestamp <- format(now, "%Y-%B-%d_%H-%M-%S")
+  paste0(timestamp, "_", str_replace(infile, "(.*)([.]csv$)", "\\1_clean\\2"))
+}
+
+outfile_path(infile)
+```
+
+To keep our script tidy we can move the functions we have defined into a separate script. Eg `cleaning-funs.R`
+```{r}
+# define functions
+localize_beach <- function(dat) {
+  lookup_table <- tribble(
+    ~where, ~english,
+    "beach",     "US",
+    "coast",     "US",
+    "seashore",     "UK",
+    "seaside",     "UK"
+  )
+  left_join(dat, lookup_table, by = "where")
+}
+
+f_to_c <- function(x) (x - 32) * 5/9
+
+celsify_temp <- function(dat) {
+  mutate(dat, temp = if_else(english == "US", f_to_c(temp), temp))
+}
+
+outfile_path <- function(infile) {
+  now <- Sys.time()
+  timestamp <- format(now, "%Y-%B-%d_%H-%M-%S")
+  paste0(timestamp, "_", str_replace(infile, "(.*)([.]csv$)", "\\1_clean\\2"))
+}
+
+```
+
+
+Putting that all together we get a simpler script where the function names tell us what the code is doing. 
+
+```{r}
+library(tidyverse)
+
+source("cleaning-funs.R")
+
+infile <- "swim.csv"
+swims <- read.csv(infile)
+
+swims <- swims %>% 
+  localize_beach() %>% 
+  celsify_temp()
+swims
+
+write.csv(swims, outfile_path(infile))
+```
+
+The tricky question is how much simplification is useful? Here the script is simpler and makes it pretty clear what the steps of the cleaning process are but it hides the assumption that we can classify country based on beach name and temperature units based on that country. Whether that is desirable depends on the use case of the code. 
+
+One useful tool for navigating code containing functions in RStudio is F2. If you place your cursor inside a function name and press F2 you will jump to the definition of the function. This allows readers that care about the details to easily navigate to them. 
+
+# Benefits of a functional mindset
+
+Once you start using functions in your code you will start to notice more opportunities to reduce repetition and write more efficient code. 
+
+## Example 3
+Let say we want to determine which variable in the `mtcars` data set is the best predictor of `mpg`. To do this we build a linear model for each variable vs `mpg` (Note this a toy example not stats advice). 
+
+```{r}
+str(mtcars)
+```
+
+A first attempt might be to right them all out by hand.
+```{r}
+library(broom)
+mod_cyl <- lm(mpg ~ cyl, data = mtcars)
+gl_cyl <- glance(mod_cyl)
+
+mod_disp <- lm(mpg ~ disp, data = mtcars)
+gl_disp <- glance(mod_disp)
+
+data.frame(var = c("cyl", "disp"), r.squared = c(gl_cyl$r.squared, gl_disp$r.squared))
+
+# But for all the variables... sigh
+```
+
+
+One option is to use a for loop
+```{r}
+mtcars_vars <- colnames(mtcars) %>% str_subset("mpg", negate = TRUE)
+
+mtcars_mods <- vector("list", length = length(mtcars_vars))
+for (i in seq_along(mtcars_vars)) {
+  form <- as.formula(paste0("mpg ~ ", mtcars_vars[i]))
+  mod <- lm(form, data = mtcars)
+  mtcars_mods[[i]] <- mod
+}
+```
+
+Another option is to write a function and iteratively apply it to all the variables
+```{r}
+fit_mpg_vs_x <- function(x){
+  form <- as.formula(paste0("mpg ~ ", x))
+  lm(form, data = mtcars)
+}
+
+# name the mtcars_vars list so output is named
+names(mtcars_vars) <- mtcars_vars
+
+mtcars_mods <- map(mtcars_vars, fit_mpg_vs_x)
+
+```
+
+I like this better than the for loop because there is less boilerplate code. But it becomes really useful if we need to apply the same model to a different set of variables. In a for loop we would need to repeat the whole thing but since a function is saved as an object we can easily apply it to a different vector. 
+
+Then we can easily apply additional functions to the results to get our desired output.
+
+```{r}
+library(broom)
+mtcars_mods %>% map(glance) %>% list_rbind(names_to = "var") %>% 
+  ggplot(aes(fct_reorder(var, r.squared), r.squared))+
+  geom_point()+
+  labs(y = "R squared", x = "Variable")
+```
+
+Or to make diagnostic plots.
+```{r}
+save_mod_chk_plts <- function(mod, nm){
+  png(filename = paste0(nm,"_check_model.png"), width = 7, height = 10, units = "in", res = 300)
+  performance::check_model(mod)
+  dev.off()
+}
+mtcars_mods %>% walk2(names(mtcars_mods), save_mod_chk_plts)
+```
+
+```{r, fig.width=6}
+knitr::include_graphics("cyl_check_model.png")
+```
+
+Oooh! With a couple tweaks I could use `save_mod_chk_plts` in lots of projects!!
+
+# When to make it a Package?
+
+An R package is a collection of functions and metadata that can be easily shared with other R users. It includes a standardized folder structure and set of files. 
+
+The copy twice rule of thumb applies to whole functions as well. Once you have copied a function across two separate script it should at least go in a separate file that is sourced in both scripts so you only need to change it in one place. Then if you are copying the same helper functions into multiple projects they should become a package that you can call in that script with `library(mypackage)`. 
+
+Another school of thought is that all analysis projects should use a package structure to organize their code ([One example](https://mdneuzerling.com/post/data-science-workflows/)) or a modified package structure with additional folders added for analysis and paper writing ([What Sarah uses](https://github.com/LandSciTech/paper-template-repo)). 
+
+# How to create a package
+
+The book [R Packages](https://r-pkgs.org/) contains everything you need to know to write a package.  
+The key files that define a package are:
+
+- DESCRIPTION:	Metadata about the package including dependencies
+- NAMESPACE:	List of imported and exported functions
+- R: Code that defines the functions of the package
+
+Two packages, devtools and usethis, and tools in RStudio make building your own package pretty easy. For example, all the boilerplate structure of a package can be created with `usethis::create_package()`. You then add new function scripts with `usethis::use_r()`, and create tests with `usethis::use_test`.
+
+# Benefits of using a package
+
+- Easy loading and re-loading: call `devtools::load_all()` (Ctrl-Shift-L) to source all the functions in your R directory
+- Way to record and install dependencies: record dependencies with `usethis::use_package()`, use `devtools::install_deps()` to install all the listed dependencies. (Note this assumes the code works with the most recent version of dependencies!)
+- Documentation: Functions in a package are documented using Roxygen, special comments that create documentation for your functions. In RStudio use Code > Insert Roxygen Skeleton or Alt-Ctrl-Shift-R to insert a template when your cursor is in a function definition.
+- pkgdown website: Run `usethis::use_pkgdown_github_pages()` to create a website with the package README as home page, vignettes rendered as articles and a reference for all the function documentation.(For example the package [roads](https://landscitech.github.io/roads/))
+- Testing: Unit tests ensure your functions continue doing what you expect when you make changes or update dependencies. `usethis::use_testthat()` sets up the testing architecture and `usethis::use_test` opens a new test file. `usethis::use_github_action()` sets up GitHub actions to run R CMD check which includes your tests on GitHub every time you commit to the main branch aka Continuous Integration testing. 
+
+```{r}
+# clean up
+list.files(here::here("vignettes"), full.names = TRUE) %>% 
+  str_subset("check_model|swim_clean") %>% str_subset("cyl", negate = TRUE) %>% 
+  file.remove()
+
+```
+
+
