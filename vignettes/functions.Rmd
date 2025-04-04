@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+th_inst <- require(testthat)
 ```
 ## Disclaimer 
 Much of the examples and code here comes from Hadley Wickham et al's books [R for data science](https://r4ds.hadley.nz/functions.html) and [R packages](https://r-pkgs.org/package-within.html).
@@ -25,6 +26,7 @@ As such, you'll need to use the "[tidyverse](https://www.tidyverse.org/)" metapa
 library(tidyverse)
 ```
 
+You might also want the "testthat" package, though that isn't necessary for most what we'll show today.
 
 # Why use functions
 
@@ -142,7 +144,7 @@ Outside of a package, this is no different than using "#" to add code comments. 
 automatically generate a help file.
 
 In Rstudio, if your cursor is inside a function, you can enter "ctrl-alt-shift-r"
-or find "Insert ROxygen skeleton" under "Code" in your menu bar. This will insert
+or find "Insert Roxygen skeleton" under "Code" in your menu bar. This will insert
 the following pieces above your function.
 
 ```{r, eval=FALSE}
@@ -207,7 +209,7 @@ rescale01(a_r)
 To formalize your understanding of what a function should do, we write tests. The
 package "testthat" can greatly help with this.
 
-```{r}
+```{r, eval=th_inst}
 testthat::test_that("All equal returns NaN",
                     {
                       testthat::expect_equal(
@@ -227,7 +229,7 @@ our function would be zero. R dividing by zero returns NaN.
 However perhaps we forgot that `min` and `max` have "na.rm=FALSE" by default,
 so we expect that only the NA in the second example would be returned as NA:
 
-```{r, error=TRUE}
+```{r, error=TRUE, eval=th_inst}
 testthat::test_that("One NA doesn't spoil the batch",
                     {
                       testthat::expect_equal(
@@ -278,7 +280,7 @@ rescale01 <- function(x, na.rm=TRUE) {
 Now we change our expectations for the initial test and add a new test to show 
 what we learned about behaviour when `na.rm=FALSE`.
 
-```{r}
+```{r eval=th_inst}
 testthat::test_that("One NA doesn't spoil the batch, unless I want it to",
                     {
                       a_r <- c(NA,runif(10, -1, 1))
@@ -297,7 +299,7 @@ testthat::test_that("One NA doesn't spoil the batch, unless I want it to",
                         {
                          
                           a_r2 <- rescale01(a_r, na.rm = FALSE)
-                          sum(is.na(a_r2)) # Count the number of NA in the output
+                          sum(is.na(a_r2)) # Count NAs
                         },
                         11
                       )
@@ -313,6 +315,8 @@ functions won't be exported to your main environment.
 
 
 -----------
+
+
 
 Now our new function will allow for your collaborator to include missing data and not ruin your analysis.
 
@@ -330,6 +334,7 @@ df |>
 ```
 
 Note: you can decrease repetition even more using iteration eg `df |> mutate(across(a:d, rescale01))`. See [R for Data Science Chapter 26](https://r4ds.hadley.nz/iteration.html) for more on this.
+
 
 # Environments 
 There is one additional part of a function that is implicitly created when the function is created which is an **environment**. An environment is the place where code looks for objects that are called. 
