@@ -55,22 +55,23 @@ Here is an example of repetition we can avoid by using a function.
 df <- tibble(a = rnorm(5), b = rnorm(5), c = rnorm(5), d = rnorm(5))
 
 df |> mutate(  
-  a = (a - min(a, na.rm = TRUE)) / (max(a, na.rm = TRUE) - min(a, na.rm = TRUE)),
-  b = (b - min(a, na.rm = TRUE)) / (max(b, na.rm = TRUE) - min(b, na.rm = TRUE)),
-  c = (c - min(c, na.rm = TRUE)) / (max(c, na.rm = TRUE) - min(c, na.rm = TRUE)),
-  d = (d - min(d, na.rm = TRUE)) / (max(d, na.rm = TRUE) - min(d, na.rm = TRUE))
+  a = (a - min(a)) / (max(a) - min(a)),
+  b = (b - min(a)) / (max(b) - min(b)),
+  c = (c - min(c)) / (max(c) - min(c)),
+  d = (d - min(d)) / (max(d) - min(d))
 )
 ```
-Can you spot the copy-paste error above?
+Can you spot the copy-paste error above? How would you discover this error in the
+resulting output?
 
 Now that we fixed that, how can we turn this into a function?
 
 ```{r}
 df |> mutate(  
-  a = (a - min(a, na.rm = TRUE)) / (max(a, na.rm = TRUE) - min(a, na.rm = TRUE)),
-  b = (b - min(b, na.rm = TRUE)) / (max(b, na.rm = TRUE) - min(b, na.rm = TRUE)),
-  c = (c - min(c, na.rm = TRUE)) / (max(c, na.rm = TRUE) - min(c, na.rm = TRUE)),
-  d = (d - min(d, na.rm = TRUE)) / (max(d, na.rm = TRUE) - min(d, na.rm = TRUE))
+  a = (a - min(a)) / (max(a) - min(a)),
+  b = (b - min(b)) / (max(b) - min(b)),
+  c = (c - min(c)) / (max(c) - min(c)),
+  d = (d - min(d)) / (max(d) - min(d))
 )
 ```
 
@@ -80,7 +81,7 @@ df |> mutate(
 For example, if we replace all the letters with `x` the rest is the same. 
 
 ```{r eval=FALSE}
-(x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+(x - min(x)) / (max(x) - min(x))
 ```
 
 2. Choose a clear **name** that tells us what the function does. Ideally a verb. 
@@ -97,7 +98,7 @@ Filling in the template we get:
 
 ```{r}
 rescale01 <- function(x) {
-  (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+  (x - min(x)) / (max(x) - min(x))
 }
 ```
 
@@ -111,16 +112,216 @@ df |> mutate(
 )
 ```
 
-Then when your collaborator says they need the output in 0-100 instead of 0-1 we only need to change the code in one place and it will apply to all the columns.
+
+# What is a function?
+A function is an object in R just like a vector. A function can be defined in a package (eg: `dplyr::mutate`) or created in an R session. 
+As mentioned above a function has three parts that need to be defined, the *name*, *arguments* and *body*.
+
+```{r eval=FALSE}
+name <- function(arguments) {
+  body
+}
+```
+
+
+
+-----------------
+
+### Brief aside: documentation and testing
+
+Before we go on, lets take a moment to introduce two coding practices that are critical
+for packages, but will greatly assist you if you get in the practice now.
+
+#### 1. Documentation
+
+In a package, function documentation is what you see when you run `?str`. It names the function,
+describes its use, outlines the argument definitions and critically has code examples.
+
+Outside of a package, this is no different than using "#" to add code comments. However the
+"roxygen2" package creates some formality to this that will aid you now and in a package
+automatically generate a help file.
+
+In Rstudio, if your cursor is inside a function, you can enter "ctrl-alt-shift-r"
+or find "Insert ROxygen skeleton" under "Code" in your menu bar. This will insert
+the following pieces above your function.
+
+```{r, eval=FALSE}
+#' Title
+#'
+#' @param x 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+rescale01 <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}
+```
+
+We can then go in and add some details about the function:
+```{r, eval=FALSE}
+#' Rescales a value between 0 and 1 
+#' 
+#' Allows you to take a vector of values or column
+#'
+#' @param x vector of values to rescale
+#'
+#' @returns vector of values rescaled
+#'
+#' @examples 
+#'        rescale01(mtcars$mpg)
+#'        
+#'        transmute(mtcars,
+#'              mpg, 
+#'              mpg_scaled = rescale01(mpg))
+#'        
+rescale01 <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}
+```
+
+R will ignore all the comments in general use, but Rstudio does highlight the arguments
+which makes them easy to read within your code. The "@examples" tag allows you to 
+show how the code is supposed to be run. This is often the only part I look at in
+a help page, so worth putting time into if your function is more complicated.
+
+
+#### 2. Testing
+
+How do we know a function is working as planned? In some cases you'll get an error, but not always.
+For example, if I run the following, I can be pretty sure I won't miss these outputs, but do you expect them?
+
+```{r}
+a <- c(1, 1, 1, 1, 1)
+rescale01(a)
+
+```
+
+
+```{r}
+a_r <- c(NA,runif(10, -1, 1))
+rescale01(a_r)
+```
+
+To formalize your understanding of what a function should do, we write tests. The
+package "testthat" can greatly help with this.
+
+```{r}
+testthat::test_that("All equal returns NaN",
+                    {
+                      testthat::expect_equal(
+                        {
+                          a <- c(1, 1, 1, 1, 1)
+                          unique(rescale01(a))
+                          
+                        },
+                        NaN
+                      )
+                    })
+```
+
+In this case, we knew that if all the values are equal the denominator in 
+our function would be zero. R dividing by zero returns NaN.
+
+However perhaps we forgot that `min` and `max` have "na.rm=FALSE" by default,
+so we expect that only the NA in the second example would be returned as NA:
+
+```{r, error=TRUE}
+testthat::test_that("One NA doesn't spoil the batch",
+                    {
+                      testthat::expect_equal(
+                        {
+                          a_r <- c(NA,runif(10, -1, 1))
+                          a_r2 <- rescale01(a_r)
+                          sum(is.na(a_r2)) # Count the number of NA in the output
+                        },
+                        1
+                      )
+                    }
+                    )
+
+```
+
+
+In this case we are expecting only one NA, but as `min` `max` will return NA, all 
+the values in the vector are returned as NA.
+
+This would allow us to quickly and easily change the code by allowing you to chose the
+na.rm behaviour and setting the default to TRUE as this is what will usually make sense.
+
+```{r}
+#' Rescales a value between 0 and 1 
+#' 
+#' Allows you to take a vector of values or column
+#'
+#' @param x vector of values to rescale
+#' @param na.rm logical should NA values be removed from min/max. Defaults to TRUE
+#'
+#' @returns vector of values rescaled
+#'
+#' @examples 
+#'        rescale01(mtcars$mpg)
+#'        
+#'        transmute(mtcars,
+#'              mpg, 
+#'              mpg_scaled = rescale01(mpg))
+#'        
+rescale01 <- function(x, na.rm=TRUE) {
+  (x - min(x, na.rm = na.rm)) / (max(x, na.rm = na.rm) - min(x, na.rm = na.rm))
+}
+
+
+
+```
+
+Now we change our expectations for the initial test and add a new test to show 
+what we learned about behaviour when `na.rm=FALSE`.
+
+```{r}
+testthat::test_that("One NA doesn't spoil the batch, unless I want it to",
+                    {
+                      a_r <- c(NA,runif(10, -1, 1))
+                      
+                      # Test default behaviour
+                      testthat::expect_equal(
+                        {
+                         a_r2 <- rescale01(a_r)
+                          sum(is.na(a_r2)) # Count the number of NA in the output
+                        },
+                        1
+                      )
+                      
+                      # Now we expect all NA if we set na.rm=FALSE
+                      testthat::expect_equal(
+                        {
+                         
+                          a_r2 <- rescale01(a_r, na.rm = FALSE)
+                          sum(is.na(a_r2)) # Count the number of NA in the output
+                        },
+                        11
+                      )
+                    }
+                    )
+
+```
+
+There is a formal structure in packages for running and storing tests, but for generic code,
+you may want a separate file in your package named 'tests-rescale01.R' or 
+`tests-functions.R' to document your tests. Also note, the code within your "testthat"
+functions won't be exported to your main environment.
+
+
+-----------
+
+Now our new function will allow for your collaborator to include missing data and not ruin your analysis.
 
 ```{r}
 
-rescale01 <- function(x) {
- x <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
- x*100
-}
-
-df |> mutate(  
+df |> 
+  # This line adds a row with just the column d included
+  bind_rows(tibble(d = 1)) |>  
+  mutate(  
   a = rescale01(a),
   b = rescale01(b),
   c = rescale01(c),
@@ -130,16 +331,7 @@ df |> mutate(
 
 Note: you can decrease repetition even more using iteration eg `df |> mutate(across(a:d, rescale01))`. See [R for Data Science Chapter 26](https://r4ds.hadley.nz/iteration.html) for more on this.
 
-# What is a function?
-A function is an object in R just like a vector. A function can be defined in a package (eg: `dplyr::mutate`) or created in an R session. 
-As mentioned above a function has three parts that need to be defined, the name, arguments and body.
-
-```{r eval=FALSE}
-name <- function(arguments) {
-  body
-}
-```
-
+# Environments 
 There is one additional part of a function that is implicitly created when the function is created which is an **environment**. An environment is the place where code looks for objects that are called. 
 
 For example, above we defined two objects `df` and `rescale01` which are both stored in the "Global environment" and are listed in the Environment pane in RStudio. The Global environment is the first place code run in the Console will look for an object. 
@@ -159,21 +351,21 @@ No! It doesn't exist in the Global environment, it only exists inside the functi
 
 For example: 
 ```{r}
-rescale01 <- function(x) {
- x <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
- x*100
+rescale01 <- function(x, na.rm=TRUE) {
+  (x - min(x, na.rm = na.rm)) / (max(x, na.rm = na.rm) - min(x, na.rm = na.rm))
  message("data rescaled")
 }
 
-rescale01(df)
+output <- rescale01(df)
+
+print(output)
 ```
 This returned NULL since that is the value returned by `message()`.
 
 To return the rescaled data we assign it to an object and then evaluate the object last.
 ```{r}
-rescale01 <- function(x) {
- x <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
- x <- x*100
+rescale01 <- function(x, na.rm=TRUE) {
+  x <- (x - min(x, na.rm = na.rm)) / (max(x, na.rm = na.rm) - min(x, na.rm = na.rm))
  message("data rescaled")
  x
 }
