@@ -19,18 +19,25 @@ knitr::opts_chunk$set(
 ## Disclaimer 
 Much of the examples and code here comes from Hadley Wickham et al's books [R for data science](https://r4ds.hadley.nz/functions.html) and [R packages](https://r-pkgs.org/package-within.html).
 
+As such, you'll need to use the "[tidyverse](https://www.tidyverse.org/)" metapackage to follow along with today's code. Use `install.packages("tidyverse")` to install the complete set of packages.
+
+```{r setup, message=FALSE}
+library(tidyverse)
+```
+
 
 # Why use functions
-
-1.  You can give a function an evocative name that makes your code easier to understand.
-
-1.  Simplify code so repetition is hidden and differences are clear
 
 1.  Avoid copy paste errors
 
 1.  Only update code in one place
 
 1.  Reuse code across different projects
+
+1.  Simplify code so repetition is hidden and differences are clear
+
+1.  You can give a function an evocative name that makes your code easier to understand.
+
 
 
 # When to write a function
@@ -43,7 +50,7 @@ This often means re-writing the first two spots where you used the code but it i
 Here is an example of repetition we can avoid by using a function. 
 
 ```{r}
-library(tidyverse)
+
 
 df <- tibble(a = rnorm(5), b = rnorm(5), c = rnorm(5), d = rnorm(5))
 
