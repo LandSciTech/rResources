@@ -60,7 +60,7 @@ This is the advice of Hadley Wickham:
 
 This often means re-writing the first two spots where you used the code but it is worth it.
 
-## Example 1
+## Example 1 {#example-one}
 
 Here is an example of repetition we can avoid by using a function. 
 
@@ -111,7 +111,7 @@ name <- function(arguments) {
 
 Filling in the template we get:
 
-```{r}
+```{r original-fun}
 rescale01 <- function(x) {
   (x - min(x)) / (max(x) - min(x))
 }
@@ -137,7 +137,7 @@ rescale01(c(runif(10, 1, 10), NA))
 
 All we need to do is change the definition of the function in one place so that we can handle NAs appropriately:
 
-```{r}
+```{r updated-fun-ex1}
 rescale01 <- function(x, na.rm=TRUE) {
   (x - min(x, na.rm = na.rm)) / (max(x, na.rm = na.rm) - min(x, na.rm = na.rm))
 }
@@ -404,7 +404,7 @@ mtcars_mods %>% map(glance) %>% list_rbind(names_to = "var") %>%
 Before we go on, lets take a moment to introduce two coding practices that are critical
 for packages, but will greatly assist you if you get in the practice now.
 
-## Documentation
+## Documentation {#documentation}
 
 In a package, function documentation is what you see when you run `?str`. It names the function,
 describes its use, outlines the argument definitions and critically has code examples.
@@ -432,7 +432,7 @@ rescale01 <- function(x) {
 ```
 
 We can then go in and add some details about the function:
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 #' Rescales a value between 0 and 1 
 #' 
 #' Allows you to take a vector of values or column
@@ -461,13 +461,15 @@ a help page, so worth putting time into if your function is more complicated.
 
 ## Testing
 
-How do we know a function is working as planned? In some cases you'll get an error, but not always.
-For example, if I run the following, I can be pretty sure I won't miss these outputs, but do you expect them?
+How do we know a function is working as planned? In some cases you'll get an error, but not always. Lets go back to the original version without the `na.rm` variable ([just above](#documentation)).
+
+
+
+With this version of the function if I run the following, I can be pretty sure I won't miss these outputs, but do you expect them?
 
 ```{r}
 a <- c(1, 1, 1, 1, 1)
 rescale01(a)
-
 ```
 
 
@@ -519,7 +521,9 @@ testthat::test_that("One NA doesn't spoil the batch",
 In this case we are expecting only one NA, but as `min` `max` will return NA, all 
 the values in the vector are returned as NA.
 
-This would allow us to quickly and easily change the code by allowing you to chose the
+As we saw in the updated function (shown below), we can update the function to include `na.rm` as variable with a default of `TRUE`.
+
+This modification allowsd us to quickly and easily change the code by allowing you to chose the
 na.rm behaviour and setting the default to TRUE as this is what will usually make sense.
 
 ```{r}
@@ -579,7 +583,6 @@ There is a formal structure in packages for running and storing tests, but for g
 you may want a separate file in your package named 'tests-rescale01.R' or 
 `tests-functions.R' to document your tests. Also note, the code within your "testthat"
 functions won't be exported to your main environment. See the `testing-cleaning-funs.R` in [this repo](https://github.com/LandSciTech/rResources) for an example.
-
 
 
 
@@ -665,3 +668,14 @@ If you are considering CRAN, start planning early:
   4. Expect some back and forth when you submit
   
   5. Use `usethis::use_release_issue()` to get a checklist of things to do before submitting to help avoid issues
+
+
+
+
+```{r, echo=FALSE, include=FALSE}
+# clean up
+list.files(here::here("vignettes"), full.names = TRUE) %>% 
+  str_subset("check_model|swim_clean") %>% str_subset("cyl", negate = TRUE) %>% 
+  file.remove()
+
+```
