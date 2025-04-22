@@ -1,7 +1,9 @@
 ---
 title: "Why use functions"
 author: "Sarah Endicott and David Hope"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+      code_folding: show
 vignette: >
   %\VignetteIndexEntry{Why use functions}
   %\VignetteEncoding{UTF-8}
@@ -15,6 +17,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+th_inst <- require(testthat)
 ```
 
 # NOTE!!! This is a draft and is being actively edited
@@ -23,12 +26,15 @@ knitr::opts_chunk$set(
 ## Disclaimer 
 Much of the examples and code here comes from Hadley Wickham et al's books [R for data science](https://r4ds.hadley.nz/functions.html) and [R packages](https://r-pkgs.org/package-within.html).
 
+As such, you'll need to use the "[tidyverse](https://www.tidyverse.org/)" metapackage to follow along with today's code. Use `install.packages("tidyverse")` to install the complete set of packages.
+
+```{r setup, message=FALSE}
+library(tidyverse)
+```
+
+You might also want the "[testthat](https://testthat.r-lib.org/)" package, though that isn't necessary for most what we'll show today.
 
 # Why use functions
-
-1.  You can give a function an evocative name that makes your code easier to understand.
-
-1.  Simplify code so repetition is hidden and differences are clear
 
 1.  Avoid copy paste errors
 
@@ -36,38 +42,52 @@ Much of the examples and code here comes from Hadley Wickham et al's books [R fo
 
 1.  Reuse code across different projects
 
+1.  Simplify code so repetition is hidden and differences are clear
+
+1.  You can give a function an evocative name that makes your code easier to understand.
+
+
 
 # When to write a function
 
 Any time you copy paste a block of code more than twice! 
 This often means re-writing the first two spots where you used the code but it is worth it. 
 
+Moving from scripts to package stemmed from following the wise advice
+from Hadley Wickham:
+
+> [A good rule of thumb is to consider writing a function whenever
+> you've copied and pasted a block of code more than twice (i.e. you now
+> have three copies of the same
+> code)](https://r4ds.hadley.nz/functions.html#introduction).
+
 ## Example 1
 
 Here is an example of repetition we can avoid by using a function. 
 
 ```{r}
-library(tidyverse)
+
 
 df <- tibble(a = rnorm(5), b = rnorm(5), c = rnorm(5), d = rnorm(5))
 
 df |> mutate(  
-  a = (a - min(a, na.rm = TRUE)) / (max(a, na.rm = TRUE) - min(a, na.rm = TRUE)),
-  b = (b - min(a, na.rm = TRUE)) / (max(b, na.rm = TRUE) - min(b, na.rm = TRUE)),
-  c = (c - min(c, na.rm = TRUE)) / (max(c, na.rm = TRUE) - min(c, na.rm = TRUE)),
-  d = (d - min(d, na.rm = TRUE)) / (max(d, na.rm = TRUE) - min(d, na.rm = TRUE))
+  a = (a - min(a)) / (max(a) - min(a)),
+  b = (b - min(a)) / (max(b) - min(b)),
+  c = (c - min(c)) / (max(c) - min(c)),
+  d = (d - min(d)) / (max(d) - min(d))
 )
 ```
-Can you spot the copy-paste error above?
+Can you spot the copy-paste error above? How would you discover this error in the
+resulting output?
 
 Now that we fixed that, how can we turn this into a function?
 
-```{r}
+```{r class.source = 'fold-hide'}
 df |> mutate(  
-  a = (a - min(a, na.rm = TRUE)) / (max(a, na.rm = TRUE) - min(a, na.rm = TRUE)),
-  b = (b - min(b, na.rm = TRUE)) / (max(b, na.rm = TRUE) - min(b, na.rm = TRUE)),
-  c = (c - min(c, na.rm = TRUE)) / (max(c, na.rm = TRUE) - min(c, na.rm = TRUE)),
-  d = (d - min(d, na.rm = TRUE)) / (max(d, na.rm = TRUE) - min(d, na.rm = TRUE))
+  a = (a - min(a)) / (max(a) - min(a)),
+  b = (b - min(b)) / (max(b) - min(b)),
+  c = (c - min(c)) / (max(c) - min(c)),
+  d = (d - min(d)) / (max(d) - min(d))
 )
 ```
 
@@ -77,7 +97,7 @@ df |> mutate(
 For example, if we replace all the letters with `x` the rest is the same. 
 
 ```{r eval=FALSE}
-(x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+(x - min(x)) / (max(x) - min(x))
 ```
 
 2. Choose a clear **name** that tells us what the function does. Ideally a verb. 
@@ -94,7 +114,7 @@ Filling in the template we get:
 
 ```{r}
 rescale01 <- function(x) {
-  (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+  (x - min(x)) / (max(x) - min(x))
 }
 ```
 
@@ -108,16 +128,206 @@ df |> mutate(
 )
 ```
 
-Then when your collaborator says they need the output in 0-100 instead of 0-1 we only need to change the code in one place and it will apply to all the columns.
+
+-----------------
+
+### Brief aside: documentation and testing
+
+Before we go on, lets take a moment to introduce two coding practices that are critical
+for packages, but will greatly assist you if you get in the practice now.
+
+#### 1. Documentation
+
+In a package, function documentation is what you see when you run `?str`. It names the function,
+describes its use, outlines the argument definitions and critically has code examples.
+
+Outside of a package, this is no different than using "#" to add code comments. However the
+"roxygen2" package creates some formality to this that will aid you now and in a package
+automatically generate a help file.
+
+In Rstudio, if your cursor is inside a function, you can enter "ctrl-alt-shift-r"
+or find "Insert Roxygen skeleton" under "Code" in your menu bar. This will insert
+the following pieces above your function.
+
+```{r, eval=FALSE}
+#' Title
+#'
+#' @param x 
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+rescale01 <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}
+```
+
+We can then go in and add some details about the function:
+```{r, eval=FALSE}
+#' Rescales a value between 0 and 1 
+#' 
+#' Allows you to take a vector of values or column
+#'
+#' @param x vector of values to rescale
+#'
+#' @returns vector of values rescaled
+#'
+#' @examples 
+#'        rescale01(mtcars$mpg)
+#'        
+#'        transmute(mtcars,
+#'              mpg, 
+#'              mpg_scaled = rescale01(mpg))
+#'        
+rescale01 <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}
+```
+
+R will ignore all the comments in general use, but Rstudio does highlight the arguments
+which makes them easy to read within your code. The "@examples" tag allows you to 
+show how the code is supposed to be run. This is often the only part I look at in
+a help page, so worth putting time into if your function is more complicated.
+
+
+#### 2. Testing
+
+How do we know a function is working as planned? In some cases you'll get an error, but not always.
+For example, if I run the following, I can be pretty sure I won't miss these outputs, but do you expect them?
+
+```{r}
+a <- c(1, 1, 1, 1, 1)
+rescale01(a)
+
+```
+
+
+```{r}
+a_r <- c(NA,runif(10, -1, 1))
+rescale01(a_r)
+```
+
+To formalize your understanding of what a function should do, we write tests. The
+package "testthat" can greatly help with this.
+
+```{r, eval=th_inst}
+testthat::test_that("All equal returns NaN",
+                    {
+                      testthat::expect_equal(
+                        {
+                          a <- c(1, 1, 1, 1, 1)
+                          unique(rescale01(a))
+                          
+                        }, 
+                        NaN # Here is what we expect the above to return
+                      )
+                    })
+```
+
+In this case, we knew that if all the values are equal the denominator in 
+our function would be zero. R dividing by zero returns NaN.
+
+However perhaps we forgot that `min` and `max` have "na.rm=FALSE" by default,
+so we expect that only the NA in the second example would be returned as NA:
+
+```{r, error=TRUE, eval=th_inst}
+testthat::test_that("One NA doesn't spoil the batch",
+                    {
+                      testthat::expect_equal(
+                        {
+                          a_r <- c(NA,runif(10, -1, 1))
+                          a_r2 <- rescale01(a_r)
+                          sum(is.na(a_r2)) # Count the number of NA in the output
+                        },
+                        1 # We expect just one NA in the output
+                      )
+                    }
+                    )
+
+```
+
+
+In this case we are expecting only one NA, but as `min` `max` will return NA, all 
+the values in the vector are returned as NA.
+
+This would allow us to quickly and easily change the code by allowing you to chose the
+na.rm behaviour and setting the default to TRUE as this is what will usually make sense.
+
+```{r}
+#' Rescales a value between 0 and 1 
+#' 
+#' Allows you to take a vector of values or column
+#'
+#' @param x vector of values to rescale
+#' @param na.rm logical should NA values be removed from min/max. Defaults to TRUE
+#'
+#' @returns vector of values rescaled
+#'
+#' @examples 
+#'        rescale01(mtcars$mpg)
+#'        
+#'        transmute(mtcars,
+#'              mpg, 
+#'              mpg_scaled = rescale01(mpg))
+#'        
+rescale01 <- function(x, na.rm=TRUE) {
+  (x - min(x, na.rm = na.rm)) / (max(x, na.rm = na.rm) - min(x, na.rm = na.rm))
+}
+
+
+
+```
+
+Now we change our expectations for the initial test and add a new test to show 
+what we learned about behaviour when `na.rm=FALSE`.
+
+```{r eval=th_inst}
+testthat::test_that("One NA doesn't spoil the batch, unless I want it to",
+                    {
+                      a_r <- c(NA,runif(10, -1, 1))
+                      
+                      # Test default behaviour
+                      testthat::expect_equal(
+                        {
+                         a_r2 <- rescale01(a_r)
+                          sum(is.na(a_r2)) # Count the number of NA in the output
+                        },
+                        1
+                      )
+                      
+                      # Now we expect all NA if we set na.rm=FALSE
+                      testthat::expect_equal(
+                        {
+                         
+                          a_r2 <- rescale01(a_r, na.rm = FALSE)
+                          sum(is.na(a_r2)) # Count NAs
+                        },
+                        11
+                      )
+                    }
+                    )
+
+```
+
+There is a formal structure in packages for running and storing tests, but for generic code,
+you may want a separate file in your package named 'tests-rescale01.R' or 
+`tests-functions.R' to document your tests. Also note, the code within your "testthat"
+functions won't be exported to your main environment. See the `testing-cleaning-funs.R` in [this repo](https://github.com/LandSciTech/rResources) for an example.
+
+
+-----------
+
+
+
+Now our new function will allow for your collaborator to include missing data and not ruin your analysis.
 
 ```{r}
 
-rescale01 <- function(x) {
- x <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
- x*100
-}
-
-df |> mutate(  
+df |> 
+  # This line adds a row with just the column d included
+  bind_rows(tibble(d = 1)) |>  
+  mutate(  
   a = rescale01(a),
   b = rescale01(b),
   c = rescale01(c),
@@ -128,16 +338,21 @@ df |> mutate(
 Note: you can decrease repetition even more using iteration eg `df |> mutate(across(a:d, rescale01))`. See [R for Data Science Chapter 26](https://r4ds.hadley.nz/iteration.html) for more on this.
 
 # What is a function?
-A function is an object in R just like a vector. A function can be defined in a package (eg: `dplyr::mutate`) or created in an R session. 
-As mentioned above a function has three parts that need to be defined, the name, arguments and body.
+A function is an object in R just like a vector or a data frame. A function can be defined in a package (eg: `dplyr::mutate`) or created in an R session. 
+As mentioned above a function has three parts that need to be defined, the **name**, **arguments** and **body**.
 
-```{r eval=FALSE}
+```{r class.source = 'fold-hide', eval=FALSE}
 name <- function(arguments) {
   body
 }
 ```
 
-There is one additional part of a function that is implicitly created when the function is created which is an **environment**. An environment is the place where code looks for objects that are called. 
+The **name** is what you use to call the function (`rescale01`), the **arguments** are
+what you provide to the function (`x` in `rescale01`) and the body is where the function does the work.
+
+
+# Environments 
+There is one additional part of a function that is implicitly created when the function is created which is an **environment**. An environment is the place where code looks for objects that are called. It is associated with the **body** of the function.
 
 For example, above we defined two objects `df` and `rescale01` which are both stored in the "Global environment" and are listed in the Environment pane in RStudio. The Global environment is the first place code run in the Console will look for an object. 
 
@@ -156,21 +371,21 @@ No! It doesn't exist in the Global environment, it only exists inside the functi
 
 For example: 
 ```{r}
-rescale01 <- function(x) {
- x <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
- x*100
+rescale01 <- function(x, na.rm=TRUE) {
+  (x - min(x, na.rm = na.rm)) / (max(x, na.rm = na.rm) - min(x, na.rm = na.rm))
  message("data rescaled")
 }
 
-rescale01(df)
+output <- rescale01(df)
+
+print(output)
 ```
 This returned NULL since that is the value returned by `message()`.
 
 To return the rescaled data we assign it to an object and then evaluate the object last.
 ```{r}
-rescale01 <- function(x) {
- x <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
- x <- x*100
+rescale01 <- function(x, na.rm=TRUE) {
+  x <- (x - min(x, na.rm = na.rm)) / (max(x, na.rm = na.rm) - min(x, na.rm = na.rm))
  message("data rescaled")
  x
 }
@@ -405,17 +620,71 @@ Two packages, devtools and usethis, and tools in RStudio make building your own 
 # Benefits of using a package
 
 - Easy loading and re-loading: call `devtools::load_all()` (Ctrl-Shift-L) to source all the functions in your R directory
+
 - Way to record and install dependencies: record dependencies with `usethis::use_package()`, use `devtools::install_deps()` to install all the listed dependencies. (Note this assumes the code works with the most recent version of dependencies!)
+
 - Documentation: Functions in a package are documented using Roxygen, special comments that create documentation for your functions. In RStudio use Code > Insert Roxygen Skeleton or Alt-Ctrl-Shift-R to insert a template when your cursor is in a function definition.
+
 - pkgdown website: Run `usethis::use_pkgdown_github_pages()` to create a website with the package README as home page, vignettes rendered as articles and a reference for all the function documentation.(For example the package [roads](https://landscitech.github.io/roads/))
+
 - Testing: Unit tests ensure your functions continue doing what you expect when you make changes or update dependencies. `usethis::use_testthat()` sets up the testing architecture and `usethis::use_test` opens a new test file. `usethis::use_github_action()` sets up GitHub actions to run R CMD check which includes your tests on GitHub every time you commit to the main branch aka Continuous Integration testing. 
 
-```{r}
+
+
+# CRAN or not
+
+If you get to the point of creating a package you want to share, one question might be "How?".
+
+Most people who use R will only use `install.packages`. If you are planning on sharing
+your packages with folks with limited technical experience or limited permissions on their
+computer, then `install.packages` is the lowest barrier to entry for users. It is however unfortunately the highest barrier for you as the package developer. Basic usage of the function requires the package to be on [CRAN](https://cran.r-project.org/web/packages/available_packages_by_name.html). There is a good chapter on submitting to CRAN here: [https://r-pkgs.org/release.html](https://r-pkgs.org/release.html).
+
+A step up in difficulty for the user is to use the [r-universe](https://r-universe.dev/search) website to host your binary files. R-universe does not generally require extra packages or software (like [Rtools](https://cran.r-project.org/bin/windows/Rtools/) or the "[devtools](https://devtools.r-lib.org/)" package). It requires a bit more work to setup, but there are some good [walkthroughs](https://ropensci.org/blog/2021/06/22/setup-runiverse/) out there.
+
+
+```{r eval=F}
+install.packages("naturecounts", 
+                 repos = c(birdscanada = 'https://birdscanada.r-universe.dev',
+                           CRAN = 'https://cloud.r-project.org'))
+```
+
+If you build your package locally, it can be installed with:
+```{r eval=F}
+install.packages("file://path/to/file.zip", repos = NULL)
+```
+However, this requires separate files for each operating system, and will often throw errors based on each users computer eccentricities and requires sharing the file each time you update.
+
+Perhaps the easiest for you is to use GitHub. This will allow users to install using
+simple packages like "remotes" or "pak".
+
+```{r eval=F}
+remotes::install_github("BirdsCanada/naturecounts")
+
+pak::pak("BirdsCanada/naturecounts")
+
+```
+
+The downside is this will require installation from "source", which requires
+the "Rtools" in Windows and may require other software installations in other OS.
+
+If you are considering CRAN, start planning early:
+  
+  1. Limit dependencies
+  
+  2. Create tests as you build
+  
+  3. Document everything public facing (and well).
+  
+  3. Run tests locally and on a server
+  
+  4. Expect some back and forth when you submit
+
+
+
+```{r, echo=FALSE, include=FALSE}
 # clean up
 list.files(here::here("vignettes"), full.names = TRUE) %>% 
   str_subset("check_model|swim_clean") %>% str_subset("cyl", negate = TRUE) %>% 
   file.remove()
 
 ```
-
-
