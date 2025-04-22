@@ -102,17 +102,15 @@ easier to understand.</p></li>
 <div class="section level2">
 <h2 id="when-to-write-a-function">When to write a function<a class="anchor" aria-label="anchor" href="#when-to-write-a-function"></a>
 </h2>
-<p>Any time you copy paste a block of code more than twice! This often
-means re-writing the first two spots where you used the code but it is
-worth it.</p>
-<p>Moving from scripts to package stemmed from following the wise advice
-from Hadley Wickham:</p>
+<p>This is the advice of Hadley Wickham:</p>
 <blockquote>
 <p><a href="https://r4ds.hadley.nz/functions.html#introduction" class="external-link">A good
 rule of thumb is to consider writing a function whenever you’ve copied
 and pasted a block of code more than twice (i.e. you now have three
 copies of the same code)</a>.</p>
 </blockquote>
+<p>This often means re-writing the first two spots where you used the
+code but it is worth it.</p>
 <div class="section level3">
 <h3 id="example-1">Example 1<a class="anchor" aria-label="anchor" href="#example-1"></a>
 </h3>
@@ -167,7 +165,8 @@ rest is the same.</p>
 <code class="sourceCode R"><span><span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>Choose a clear <strong>name</strong> that tells us what the function
-does. Ideally a verb.</li>
+does. Ideally a verb. Lets use <code>rescale01</code> since the code
+rescales the vector to 0-1.</li>
 <li>Name the parts that will change between uses, these are the
 <strong>arguments</strong>. <code>x</code> is a conventional name for a
 numeric vector.</li>
@@ -199,177 +198,23 @@ are applying the same rescaling across each column.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 0     0.530 1     0.752</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 0.795 0.531 0     1    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 1     0.518 0.580 0.394</span></span></code></pre></div>
-<hr>
-<div class="section level4">
-<h4 id="brief-aside-documentation-and-testing">Brief aside: documentation and testing<a class="anchor" aria-label="anchor" href="#brief-aside-documentation-and-testing"></a>
-</h4>
-<p>Before we go on, lets take a moment to introduce two coding practices
-that are critical for packages, but will greatly assist you if you get
-in the practice now.</p>
-<div class="section level5">
-<h5 id="documentation">1. Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
-</h5>
-<p>In a package, function documentation is what you see when you run
-<code><a href="https://rdrr.io/r/utils/str.html" class="external-link">?str</a></code>. It names the function, describes its use, outlines
-the argument definitions and critically has code examples.</p>
-<p>Outside of a package, this is no different than using “#” to add code
-comments. However the “roxygen2” package creates some formality to this
-that will aid you now and in a package automatically generate a help
-file.</p>
-<p>In Rstudio, if your cursor is inside a function, you can enter
-“ctrl-alt-shift-r” or find “Insert Roxygen skeleton” under “Code” in
-your menu bar. This will insert the following pieces above your
-function.</p>
+<p>Note: you can decrease repetition even more using iteration eg
+<code>df |&gt; mutate(across(a:d, rescale01))</code>. See <a href="https://r4ds.hadley.nz/iteration.html" class="external-link">R for Data Science Chapter
+26</a> for more on this.</p>
+<p>What if we try our function on data containing an
+<code>NA</code>?</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#' Title</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @param x </span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @returns</span></span>
-<span><span class="co">#' @export</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @examples</span></span>
-<span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-<p>We can then go in and add some details about the function:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#' Rescales a value between 0 and 1 </span></span>
-<span><span class="co">#' </span></span>
-<span><span class="co">#' Allows you to take a vector of values or column</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @param x vector of values to rescale</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @returns vector of values rescaled</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @examples </span></span>
-<span><span class="co">#'        rescale01(mtcars$mpg)</span></span>
-<span><span class="co">#'        </span></span>
-<span><span class="co">#'        transmute(mtcars,</span></span>
-<span><span class="co">#'              mpg, </span></span>
-<span><span class="co">#'              mpg_scaled = rescale01(mpg))</span></span>
-<span><span class="co">#'        </span></span>
-<span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-<p>R will ignore all the comments in general use, but Rstudio does
-highlight the arguments which makes them easy to read within your code.
-The “<span class="citation">@examples</span>” tag allows you to show how
-the code is supposed to be run. This is often the only part I look at in
-a help page, so worth putting time into if your function is more
-complicated.</p>
-</div>
-<div class="section level5">
-<h5 id="testing">2. Testing<a class="anchor" aria-label="anchor" href="#testing"></a>
-</h5>
-<p>How do we know a function is working as planned? In some cases you’ll
-get an error, but not always. For example, if I run the following, I can
-be pretty sure I won’t miss these outputs, but do you expect them?</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu">rescale01</span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] NaN NaN NaN NaN NaN</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a_r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>,<span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">10</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">rescale01</span><span class="op">(</span><span class="va">a_r</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu">rescale01</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">1</span>, <span class="fl">10</span><span class="op">)</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] NA NA NA NA NA NA NA NA NA NA NA</span></span></code></pre></div>
-<p>To formalize your understanding of what a function should do, we
-write tests. The package “testthat” can greatly help with this.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu">test_that</span><span class="op">(</span><span class="st">"All equal returns NaN"</span>,</span>
-<span>                    <span class="op">{</span></span>
-<span>                      <span class="fu">testthat</span><span class="fu">::</span><span class="fu">expect_equal</span><span class="op">(</span></span>
-<span>                        <span class="op">{</span></span>
-<span>                          <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span>                          <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu">rescale01</span><span class="op">(</span><span class="va">a</span><span class="op">)</span><span class="op">)</span></span>
-<span>                          </span>
-<span>                        <span class="op">}</span>, </span>
-<span>                        <span class="cn">NaN</span> <span class="co"># Here is what we expect the above to return</span></span>
-<span>                      <span class="op">)</span></span>
-<span>                    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>In this case, we knew that if all the values are equal the
-denominator in our function would be zero. R dividing by zero returns
-NaN.</p>
-<p>However perhaps we forgot that <code>min</code> and <code>max</code>
-have “na.rm=FALSE” by default, so we expect that only the NA in the
-second example would be returned as NA:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu">test_that</span><span class="op">(</span><span class="st">"One NA doesn't spoil the batch"</span>,</span>
-<span>                    <span class="op">{</span></span>
-<span>                      <span class="fu">testthat</span><span class="fu">::</span><span class="fu">expect_equal</span><span class="op">(</span></span>
-<span>                        <span class="op">{</span></span>
-<span>                          <span class="va">a_r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>,<span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">10</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span>                          <span class="va">a_r2</span> <span class="op">&lt;-</span> <span class="fu">rescale01</span><span class="op">(</span><span class="va">a_r</span><span class="op">)</span></span>
-<span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">a_r2</span><span class="op">)</span><span class="op">)</span> <span class="co"># Count the number of NA in the output</span></span>
-<span>                        <span class="op">}</span>,</span>
-<span>                        <span class="fl">1</span> <span class="co"># We expect just one NA in the output</span></span>
-<span>                      <span class="op">)</span></span>
-<span>                    <span class="op">}</span></span>
-<span>                    <span class="op">)</span></span></code></pre></div>
-<p>In this case we are expecting only one NA, but as <code>min</code>
-<code>max</code> will return NA, all the values in the vector are
-returned as NA.</p>
-<p>This would allow us to quickly and easily change the code by allowing
-you to chose the na.rm behaviour and setting the default to TRUE as this
-is what will usually make sense.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#' Rescales a value between 0 and 1 </span></span>
-<span><span class="co">#' </span></span>
-<span><span class="co">#' Allows you to take a vector of values or column</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @param x vector of values to rescale</span></span>
-<span><span class="co">#' @param na.rm logical should NA values be removed from min/max. Defaults to TRUE</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @returns vector of values rescaled</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @examples </span></span>
-<span><span class="co">#'        rescale01(mtcars$mpg)</span></span>
-<span><span class="co">#'        </span></span>
-<span><span class="co">#'        transmute(mtcars,</span></span>
-<span><span class="co">#'              mpg, </span></span>
-<span><span class="co">#'              mpg_scaled = rescale01(mpg))</span></span>
-<span><span class="co">#'        </span></span>
-<span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">na.rm</span><span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span></span>
+<p>All we need to do is change the definition of the function in one
+place so that we can handle NAs appropriately:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">na.rm</span><span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>Now we change our expectations for the initial test and add a new
-test to show what we learned about behaviour when
-<code>na.rm=FALSE</code>.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu">test_that</span><span class="op">(</span><span class="st">"One NA doesn't spoil the batch, unless I want it to"</span>,</span>
-<span>                    <span class="op">{</span></span>
-<span>                      <span class="va">a_r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>,<span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">10</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span>                      </span>
-<span>                      <span class="co"># Test default behaviour</span></span>
-<span>                      <span class="fu">testthat</span><span class="fu">::</span><span class="fu">expect_equal</span><span class="op">(</span></span>
-<span>                        <span class="op">{</span></span>
-<span>                         <span class="va">a_r2</span> <span class="op">&lt;-</span> <span class="fu">rescale01</span><span class="op">(</span><span class="va">a_r</span><span class="op">)</span></span>
-<span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">a_r2</span><span class="op">)</span><span class="op">)</span> <span class="co"># Count the number of NA in the output</span></span>
-<span>                        <span class="op">}</span>,</span>
-<span>                        <span class="fl">1</span></span>
-<span>                      <span class="op">)</span></span>
-<span>                      </span>
-<span>                      <span class="co"># Now we expect all NA if we set na.rm=FALSE</span></span>
-<span>                      <span class="fu">testthat</span><span class="fu">::</span><span class="fu">expect_equal</span><span class="op">(</span></span>
-<span>                        <span class="op">{</span></span>
-<span>                         </span>
-<span>                          <span class="va">a_r2</span> <span class="op">&lt;-</span> <span class="fu">rescale01</span><span class="op">(</span><span class="va">a_r</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">a_r2</span><span class="op">)</span><span class="op">)</span> <span class="co"># Count NAs</span></span>
-<span>                        <span class="op">}</span>,</span>
-<span>                        <span class="fl">11</span></span>
-<span>                      <span class="op">)</span></span>
-<span>                    <span class="op">}</span></span>
-<span>                    <span class="op">)</span></span></code></pre></div>
-<p>There is a formal structure in packages for running and storing
-tests, but for generic code, you may want a separate file in your
-package named ‘tests-rescale01.R’ or
-<code>tests-functions.R' to document your tests. Also note, the code within your "testthat" functions won't be exported to your main environment. See the</code>testing-cleaning-funs.R`
-in <a href="https://github.com/LandSciTech/rResources" class="external-link">this repo</a> for
-an example.</p>
-<hr>
 <p>Now our new function will allow for your collaborator to include
 missing data and not ruin your analysis.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">df</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="co"># This line adds a row with just the column d included</span></span>
@@ -389,11 +234,8 @@ missing data and not ruin your analysis.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>  0.795  0.531  0     0.840</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  1      0.518  0.580 0.331</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>     1</span></span></code></pre></div>
-<p>Note: you can decrease repetition even more using iteration eg
-<code>df |&gt; mutate(across(a:d, rescale01))</code>. See <a href="https://r4ds.hadley.nz/iteration.html" class="external-link">R for Data Science Chapter
-26</a> for more on this.</p>
-</div>
-</div>
+<p>Below we talk more about anticipating these types of failures before
+the happen and using testing to ensure your functions are robust.</p>
 </div>
 </div>
 <div class="section level2">
@@ -404,7 +246,7 @@ function can be defined in a package (eg: <code><a href="https://dplyr.tidyverse
 created in an R session. As mentioned above a function has three parts
 that need to be defined, the <strong>name</strong>,
 <strong>arguments</strong> and <strong>body</strong>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">name</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">arguments</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">body</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -412,10 +254,9 @@ that need to be defined, the <strong>name</strong>,
 (<code>rescale01</code>), the <strong>arguments</strong> are what you
 provide to the function (<code>x</code> in <code>rescale01</code>) and
 the body is where the function does the work.</p>
-</div>
-<div class="section level2">
-<h2 id="environments">Environments<a class="anchor" aria-label="anchor" href="#environments"></a>
-</h2>
+<div class="section level3">
+<h3 id="environments">Environments<a class="anchor" aria-label="anchor" href="#environments"></a>
+</h3>
 <p>There is one additional part of a function that is implicitly created
 when the function is created which is an <strong>environment</strong>.
 An environment is the place where code looks for objects that are
@@ -429,8 +270,7 @@ object.</p>
 <p>But inside the body of our function <code>rescale01</code> we also
 defined an object <code>x</code>.</p>
 <p>Does <code>x</code> exist?</p>
-<p><br><br></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span></span>
 <span><span class="co">#&gt; Error: object 'x' not found</span></span></code></pre></div>
 <p>No! It doesn’t exist in the Global environment, it only exists inside
@@ -438,9 +278,9 @@ the function’s environment. Objects created inside a function are not
 available in the Global environment. Only the result of the last
 expression evaluated in the function will be returned.</p>
 <p>For example:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">na.rm</span><span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
 <span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"data rescaled"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
@@ -453,9 +293,9 @@ expression evaluated in the function will be returned.</p>
 <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>.</p>
 <p>To return the rescaled data we assign it to an object and then
 evaluate the object last.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">na.rm</span><span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
 <span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"data rescaled"</span><span class="op">)</span></span>
 <span> <span class="va">x</span></span>
 <span><span class="op">}</span></span>
@@ -469,6 +309,7 @@ evaluate the object last.</p>
 <span><span class="co">#&gt; 4 0.5401014 0.4870998 0.1790810 0.6619434</span></span>
 <span><span class="co">#&gt; 5 0.6793915 0.4785473 0.6551536 0.3383143</span></span></code></pre></div>
 </div>
+</div>
 <div class="section level2">
 <h2 id="converting-existing-scripts-to-use-functions">Converting existing scripts to use functions<a class="anchor" aria-label="anchor" href="#converting-existing-scripts-to-use-functions"></a>
 </h2>
@@ -478,7 +319,7 @@ evaluate the object last.</p>
 <p>Imagine we have a script to process csv files containing observations
 of temperature and location from swimmers.</p>
 <p>This is the R script:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">infile</span> <span class="op">&lt;-</span> <span class="st">"swim.csv"</span></span>
 <span><span class="va">swims_in</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">infile</span><span class="op">)</span></span>
 <span><span class="va">swims</span> <span class="op">&lt;-</span> <span class="va">swims_in</span></span>
@@ -510,7 +351,7 @@ of temperature and location from swimmers.</p>
 <span><span class="va">now</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">timestamp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">now</span>, <span class="st">"%Y-%B-%d_%H-%M-%S"</span><span class="op">)</span></span>
 <span><span class="op">(</span><span class="va">outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">timestamp</span>, <span class="st">"_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"(.*)([.]csv$)"</span>, <span class="st">"\\1_clean\\2"</span>, <span class="va">infile</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "2025-April-22_18-04-39_swim_clean.csv"</span></span>
+<span><span class="co">#&gt; [1] "2025-April-22_19-12-27_swim_clean.csv"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">swims</span>, file <span class="op">=</span> <span class="va">outfile</span>, quote <span class="op">=</span> <span class="cn">FALSE</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>This is an example of how functions can help to simplify code even
 when there isn’t a lot of repetition.</p>
@@ -518,7 +359,7 @@ when there isn’t a lot of repetition.</p>
 for the swimming location. This uses a look up table rather than
 assigning each directly to reduce the repeated
 <code>swims$english[swims$where ==</code> calls.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">localize_beach</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">dat</span><span class="op">)</span> <span class="op">{</span></span>
@@ -541,7 +382,7 @@ assigning each directly to reduce the repeated
 <span><span class="co">#&gt; 5 Evan  seaside   31      UK</span></span></code></pre></div>
 <p>Then we write two functions, one to convert F to C and another that
 applies <code>f_to_c()</code> to US temperatures in a data frame.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f_to_c</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fl">32</span><span class="op">)</span> <span class="op">*</span> <span class="fl">5</span><span class="op">/</span><span class="fl">9</span></span>
 <span></span>
 <span><span class="va">celsify_temp</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">dat</span><span class="op">)</span> <span class="op">{</span></span>
@@ -556,7 +397,7 @@ applies <code>f_to_c()</code> to US temperatures in a data frame.</p>
 <span><span class="co">#&gt; 4 Dale    beach 29.44444      US</span></span>
 <span><span class="co">#&gt; 5 Evan  seaside 31.00000      UK</span></span></code></pre></div>
 <p>Finally, one more function to create the output file name</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">outfile_path</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">infile</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">now</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="va">timestamp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">now</span>, <span class="st">"%Y-%B-%d_%H-%M-%S"</span><span class="op">)</span></span>
@@ -564,10 +405,10 @@ applies <code>f_to_c()</code> to US temperatures in a data frame.</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="fu">outfile_path</span><span class="op">(</span><span class="va">infile</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "2025-April-22_18-04-39_swim_clean.csv"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "2025-April-22_19-12-28_swim_clean.csv"</span></span></code></pre></div>
 <p>To keep our script tidy we can move the functions we have defined
 into a separate script. Eg <code>cleaning-funs.R</code></p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># define functions</span></span>
 <span><span class="va">localize_beach</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">dat</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">lookup_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html" class="external-link">tribble</a></span><span class="op">(</span></span>
@@ -593,7 +434,7 @@ into a separate script. Eg <code>cleaning-funs.R</code></p>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Putting that all together we get a simpler script where the function
 names tell us what the code is doing.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"cleaning-funs.R"</span><span class="op">)</span></span>
@@ -637,22 +478,8 @@ code.</p>
 <code>mtcars</code> data set is the best predictor of <code>mpg</code>.
 To do this we build a linear model for each variable vs <code>mpg</code>
 (Note this a toy example not stats advice).</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 'data.frame':    32 obs. of  11 variables:</span></span>
-<span><span class="co">#&gt;  $ mpg : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...</span></span>
-<span><span class="co">#&gt;  $ cyl : num  6 6 4 6 8 6 8 4 4 6 ...</span></span>
-<span><span class="co">#&gt;  $ disp: num  160 160 108 258 360 ...</span></span>
-<span><span class="co">#&gt;  $ hp  : num  110 110 93 110 175 105 245 62 95 123 ...</span></span>
-<span><span class="co">#&gt;  $ drat: num  3.9 3.9 3.85 3.08 3.15 2.76 3.21 3.69 3.92 3.92 ...</span></span>
-<span><span class="co">#&gt;  $ wt  : num  2.62 2.88 2.32 3.21 3.44 ...</span></span>
-<span><span class="co">#&gt;  $ qsec: num  16.5 17 18.6 19.4 17 ...</span></span>
-<span><span class="co">#&gt;  $ vs  : num  0 0 1 1 0 1 0 1 1 1 ...</span></span>
-<span><span class="co">#&gt;  $ am  : num  1 1 1 0 0 0 0 0 0 0 ...</span></span>
-<span><span class="co">#&gt;  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...</span></span>
-<span><span class="co">#&gt;  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...</span></span></code></pre></div>
 <p>A first attempt might be to right them all out by hand.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/" class="external-link">broom</a></span><span class="op">)</span></span>
 <span><span class="va">mod_cyl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">cyl</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span></span>
 <span><span class="va">gl_cyl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mod_cyl</span><span class="op">)</span></span>
@@ -667,7 +494,7 @@ To do this we build a linear model for each variable vs <code>mpg</code>
 <span></span>
 <span><span class="co"># But for all the variables... sigh</span></span></code></pre></div>
 <p>One option is to use a for loop</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mtcars_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_subset.html" class="external-link">str_subset</a></span><span class="op">(</span><span class="st">"mpg"</span>, negate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">mtcars_mods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></span><span class="op">(</span><span class="st">"list"</span>, length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mtcars_vars</span><span class="op">)</span><span class="op">)</span></span>
@@ -678,7 +505,7 @@ To do this we build a linear model for each variable vs <code>mpg</code>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Another option is to write a function and iteratively apply it to all
 the variables</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_mpg_vs_x</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">form</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"mpg ~ "</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">form</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span></span>
@@ -695,26 +522,183 @@ to repeat the whole thing but since a function is saved as an object we
 can easily apply it to a different vector.</p>
 <p>Then we can easily apply additional functions to the results to get
 our desired output.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/" class="external-link">broom</a></span><span class="op">)</span></span>
 <span><span class="va">mtcars_mods</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">glance</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"var"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_reorder.html" class="external-link">fct_reorder</a></span><span class="op">(</span><span class="va">var</span>, <span class="va">r.squared</span><span class="op">)</span>, <span class="va">r.squared</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"R squared"</span>, x <span class="op">=</span> <span class="st">"Variable"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="functions_files/figure-html/unnamed-chunk-31-1.png" width="700"></p>
-<p>Or to make diagnostic plots.</p>
+<p><img src="functions_files/figure-html/unnamed-chunk-24-1.png" width="576"></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="best-practices-for-writing-functions">Best practices for writing functions<a class="anchor" aria-label="anchor" href="#best-practices-for-writing-functions"></a>
+</h2>
+<p>Before we go on, lets take a moment to introduce two coding practices
+that are critical for packages, but will greatly assist you if you get
+in the practice now.</p>
+<div class="section level3">
+<h3 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h3>
+<p>In a package, function documentation is what you see when you run
+<code><a href="https://rdrr.io/r/utils/str.html" class="external-link">?str</a></code>. It names the function, describes its use, outlines
+the argument definitions and critically has code examples.</p>
+<p>Outside of a package, this is no different than using “#” to add code
+comments. However the “roxygen2” package creates some formality to this
+that will aid you now and in a package automatically generate a help
+file.</p>
+<p>In Rstudio, if your cursor is inside a function, you can enter
+“ctrl-alt-shift-r” or find “Insert Roxygen skeleton” under “Code” in
+your menu bar. This will insert the following pieces above your
+function.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#' Title</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @param x </span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @returns</span></span>
+<span><span class="co">#' @export</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @examples</span></span>
+<span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>We can then go in and add some details about the function:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#' Rescales a value between 0 and 1 </span></span>
+<span><span class="co">#' </span></span>
+<span><span class="co">#' Allows you to take a vector of values or column</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @param x vector of values to rescale</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @returns vector of values rescaled</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @examples </span></span>
+<span><span class="co">#'        rescale01(mtcars$mpg)</span></span>
+<span><span class="co">#'        </span></span>
+<span><span class="co">#'        transmute(mtcars,</span></span>
+<span><span class="co">#'              mpg, </span></span>
+<span><span class="co">#'              mpg_scaled = rescale01(mpg))</span></span>
+<span><span class="co">#'        </span></span>
+<span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>R will ignore all the comments in general use, but Rstudio does
+highlight the arguments which makes them easy to read within your code.
+The “<span class="citation">@examples</span>” tag allows you to show how
+the code is supposed to be run. This is often the only part I look at in
+a help page, so worth putting time into if your function is more
+complicated.</p>
+</div>
+<div class="section level3">
+<h3 id="testing">Testing<a class="anchor" aria-label="anchor" href="#testing"></a>
+</h3>
+<p>How do we know a function is working as planned? In some cases you’ll
+get an error, but not always. For example, if I run the following, I can
+be pretty sure I won’t miss these outputs, but do you expect them?</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu">rescale01</span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span>
+<span><span class="co">#&gt; data rescaled</span></span>
+<span><span class="co">#&gt; [1] NaN NaN NaN NaN NaN</span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">a_r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>,<span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">10</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">rescale01</span><span class="op">(</span><span class="va">a_r</span><span class="op">)</span></span>
+<span><span class="co">#&gt; data rescaled</span></span>
+<span><span class="co">#&gt;  [1] NA NA NA NA NA NA NA NA NA NA NA</span></span></code></pre></div>
+<p>To formalize your understanding of what a function should do, we
+write tests. The package “testthat” can greatly help with this.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu">test_that</span><span class="op">(</span><span class="st">"All equal returns NaN"</span>,</span>
+<span>                    <span class="op">{</span></span>
+<span>                      <span class="fu">testthat</span><span class="fu">::</span><span class="fu">expect_equal</span><span class="op">(</span></span>
+<span>                        <span class="op">{</span></span>
+<span>                          <span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>                          <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu">rescale01</span><span class="op">(</span><span class="va">a</span><span class="op">)</span><span class="op">)</span></span>
+<span>                          </span>
+<span>                        <span class="op">}</span>, </span>
+<span>                        <span class="cn">NaN</span> <span class="co"># Here is what we expect the above to return</span></span>
+<span>                      <span class="op">)</span></span>
+<span>                    <span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>In this case, we knew that if all the values are equal the
+denominator in our function would be zero. R dividing by zero returns
+NaN.</p>
+<p>However perhaps we forgot that <code>min</code> and <code>max</code>
+have “na.rm=FALSE” by default, so we expect that only the NA in the
+second example would be returned as NA:</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu">test_that</span><span class="op">(</span><span class="st">"One NA doesn't spoil the batch"</span>,</span>
+<span>                    <span class="op">{</span></span>
+<span>                      <span class="fu">testthat</span><span class="fu">::</span><span class="fu">expect_equal</span><span class="op">(</span></span>
+<span>                        <span class="op">{</span></span>
+<span>                          <span class="va">a_r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>,<span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">10</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>                          <span class="va">a_r2</span> <span class="op">&lt;-</span> <span class="fu">rescale01</span><span class="op">(</span><span class="va">a_r</span><span class="op">)</span></span>
+<span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">a_r2</span><span class="op">)</span><span class="op">)</span> <span class="co"># Count the number of NA in the output</span></span>
+<span>                        <span class="op">}</span>,</span>
+<span>                        <span class="fl">1</span> <span class="co"># We expect just one NA in the output</span></span>
+<span>                      <span class="op">)</span></span>
+<span>                    <span class="op">}</span></span>
+<span>                    <span class="op">)</span></span></code></pre></div>
+<p>In this case we are expecting only one NA, but as <code>min</code>
+<code>max</code> will return NA, all the values in the vector are
+returned as NA.</p>
+<p>This would allow us to quickly and easily change the code by allowing
+you to chose the na.rm behaviour and setting the default to TRUE as this
+is what will usually make sense.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#' Rescales a value between 0 and 1 </span></span>
+<span><span class="co">#' </span></span>
+<span><span class="co">#' Allows you to take a vector of values or column</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @param x vector of values to rescale</span></span>
+<span><span class="co">#' @param na.rm logical should NA values be removed from min/max. Defaults to TRUE</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @returns vector of values rescaled</span></span>
+<span><span class="co">#'</span></span>
+<span><span class="co">#' @examples </span></span>
+<span><span class="co">#'        rescale01(mtcars$mpg)</span></span>
+<span><span class="co">#'        </span></span>
+<span><span class="co">#'        transmute(mtcars,</span></span>
+<span><span class="co">#'              mpg, </span></span>
+<span><span class="co">#'              mpg_scaled = rescale01(mpg))</span></span>
+<span><span class="co">#'        </span></span>
+<span><span class="va">rescale01</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">na.rm</span><span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="va">na.rm</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>Now we change our expectations for the initial test and add a new
+test to show what we learned about behaviour when
+<code>na.rm=FALSE</code>.</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">save_mod_chk_plts</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mod</span>, <span class="va">nm</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span>filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">nm</span>,<span class="st">"_check_model.png"</span><span class="op">)</span>, width <span class="op">=</span> <span class="fl">7</span>, height <span class="op">=</span> <span class="fl">10</span>, units <span class="op">=</span> <span class="st">"in"</span>, res <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span>
-<span>  <span class="fu">performance</span><span class="fu">::</span><span class="fu"><a href="https://easystats.github.io/performance/reference/check_model.html" class="external-link">check_model</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="va">mtcars_mods</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">walk2</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mtcars_mods</span><span class="op">)</span>, <span class="va">save_mod_chk_plts</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="st">"cyl_check_model.png"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="cyl_check_model.png"><!-- --></p>
-<p>Oooh! With a couple tweaks I could use <code>save_mod_chk_plts</code>
-in lots of projects!!</p>
+<code class="sourceCode R"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu">test_that</span><span class="op">(</span><span class="st">"One NA doesn't spoil the batch, unless I want it to"</span>,</span>
+<span>                    <span class="op">{</span></span>
+<span>                      <span class="va">a_r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>,<span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">10</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>                      </span>
+<span>                      <span class="co"># Test default behaviour</span></span>
+<span>                      <span class="fu">testthat</span><span class="fu">::</span><span class="fu">expect_equal</span><span class="op">(</span></span>
+<span>                        <span class="op">{</span></span>
+<span>                         <span class="va">a_r2</span> <span class="op">&lt;-</span> <span class="fu">rescale01</span><span class="op">(</span><span class="va">a_r</span><span class="op">)</span></span>
+<span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">a_r2</span><span class="op">)</span><span class="op">)</span> <span class="co"># Count the number of NA in the output</span></span>
+<span>                        <span class="op">}</span>,</span>
+<span>                        <span class="fl">1</span></span>
+<span>                      <span class="op">)</span></span>
+<span>                      </span>
+<span>                      <span class="co"># Now we expect all NA if we set na.rm=FALSE</span></span>
+<span>                      <span class="fu">testthat</span><span class="fu">::</span><span class="fu">expect_equal</span><span class="op">(</span></span>
+<span>                        <span class="op">{</span></span>
+<span>                         </span>
+<span>                          <span class="va">a_r2</span> <span class="op">&lt;-</span> <span class="fu">rescale01</span><span class="op">(</span><span class="va">a_r</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>                          <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">a_r2</span><span class="op">)</span><span class="op">)</span> <span class="co"># Count NAs</span></span>
+<span>                        <span class="op">}</span>,</span>
+<span>                        <span class="fl">11</span></span>
+<span>                      <span class="op">)</span></span>
+<span>                    <span class="op">}</span></span>
+<span>                    <span class="op">)</span></span></code></pre></div>
+<p>There is a formal structure in packages for running and storing
+tests, but for generic code, you may want a separate file in your
+package named ‘tests-rescale01.R’ or
+<code>tests-functions.R' to document your tests. Also note, the code within your "testthat" functions won't be exported to your main environment. See the</code>testing-cleaning-funs.R`
+in <a href="https://github.com/LandSciTech/rResources" class="external-link">this repo</a> for
+an example.</p>
 </div>
 </div>
 <div class="section level2">
@@ -801,19 +785,19 @@ software (like <a href="https://cran.r-project.org/bin/windows/Rtools/" class="e
 “<a href="https://devtools.r-lib.org/" class="external-link">devtools</a>” package). It
 requires a bit more work to setup, but there are some good <a href="https://ropensci.org/blog/2021/06/22/setup-runiverse/" class="external-link">walkthroughs</a>
 out there.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"naturecounts"</span>, </span>
 <span>                 repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>birdscanada <span class="op">=</span> <span class="st">'https://birdscanada.r-universe.dev'</span>,</span>
 <span>                           CRAN <span class="op">=</span> <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>If you build your package locally, it can be installed with:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"file://path/to/file.zip"</span>, repos <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
 <p>However, this requires separate files for each operating system, and
 will often throw errors based on each users computer eccentricities and
 requires sharing the file each time you update.</p>
 <p>Perhaps the easiest for you is to use GitHub. This will allow users
 to install using simple packages like “remotes” or “pak”.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"BirdsCanada/naturecounts"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"BirdsCanada/naturecounts"</span><span class="op">)</span></span></code></pre></div>
@@ -827,6 +811,8 @@ installations in other OS.</p>
 <li><p>Document everything public facing (and well).</p></li>
 <li><p>Run tests locally and on a server</p></li>
 <li><p>Expect some back and forth when you submit</p></li>
+<li><p>Use <code>usethis::use_release_issue()</code> to get a checklist
+of things to do before submitting to help avoid issues</p></li>
 </ol>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
