@@ -20,8 +20,6 @@ knitr::opts_chunk$set(
 th_inst <- require(testthat)
 ```
 
-# NOTE!!! This is a draft and is being actively edited
-
 
 ## Disclaimer 
 Much of the examples and code here comes from Hadley Wickham et al's books [R for data science](https://r4ds.hadley.nz/functions.html) and [R packages](https://r-pkgs.org/package-within.html).
