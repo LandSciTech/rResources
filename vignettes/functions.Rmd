@@ -156,7 +156,7 @@ df |>
 )
 ```
 
-Below we talk more about anticipating these types of failures before the happen and using testing to ensure your functions are robust. 
+Below we talk more about anticipating these types of failures before they happen and using testing to ensure your functions are robust. 
 
 # What is a function?
 A function is an object in R just like a vector or a data frame. A function can be defined in a package (eg: `dplyr::mutate`) or created in an R session. 
